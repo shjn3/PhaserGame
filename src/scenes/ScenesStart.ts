@@ -23,6 +23,6 @@ export default class ScenesStart extends Phaser.Scene {
   }
   update(time: number, delta: number): void {}
   onChangeScenes() {
-    this.scene.start("play");
+    this.scene.start("preloadPlay");
   }
 }

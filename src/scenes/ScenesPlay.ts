@@ -9,7 +9,7 @@ export default class ScenesPlay extends Phaser.Scene {
   isGameRunning: boolean = true;
   gapCloud: number = 0;
   score: number = 0;
-  heightScore: number = 0;
+  hightScore: number = 0;
   scoreText?: Phaser.GameObjects.Text;
   hightScoreText?: Phaser.GameObjects.Text;
   obstacles?: Phaser.GameObjects.Group;
@@ -18,53 +18,46 @@ export default class ScenesPlay extends Phaser.Scene {
   jumpSound?: Phaser.Sound.BaseSound;
   hitSound?: Phaser.Sound.BaseSound;
 
+  textGameOver?: Phaser.GameObjects.Image;
+  btnRestart?: Phaser.GameObjects.Image;
+
   constructor() {
     super("play");
   }
-  preload() {
-    this.load.spritesheet("playerRun", "assets/player/dino-run.png", {
-      frameWidth: 88,
-      frameHeight: 90,
-    });
-    this.load.spritesheet("playerDuck", "assets/player/dino-down.png", {
-      frameWidth: 118,
-      frameHeight: 90,
-    });
-    this.load.image("ground", "assets/start/ground.png");
-    this.load.image("cloud", "assets/cloud.png");
-    this.load.image("cactuses0", "assets/obstacles/cactuses_big_1.png");
-    this.load.image("cactuses1", "assets/obstacles/cactuses_big_2.png");
-    this.load.image("cactuses2", "assets/obstacles/cactuses_big_3.png");
-    this.load.image("cactuses3", "assets/obstacles/cactuses_small_1.png");
-    this.load.image("cactuses4", "assets/obstacles/cactuses_small_2.png");
-    this.load.image("cactuses5", "assets/obstacles/cactuses_small_3.png");
-    this.load.spritesheet("bird", "assets/obstacles/enemy-bird.png", {
-      frameWidth: 92,
-      frameHeight: 70,
-    });
-    //load audio
-    this.load.audio("jump", "assets/player/sfx/jump.wav");
-    this.load.audio("hit", "assets/player/sfx/hit.wav");
-    //game Over
-    this.load.image("textGameOver", "assets/gameOver/game-over.png");
-    this.load.image("btnRestart", "assets/gameOver/restart.png");
-  }
   /*==============create======================= */
   create() {
+    //background
     this.createCloud();
-    this.createAnis();
     this.createGround();
+    //Game Object
+    this.createAnis();
+    this.createSound();
+    //Play and enemy
     this.createPlayer();
+    this.obstacles = this.physics.add.group();
+    //score, hight score
     this.createScoreText();
     this.createHightScoreText();
+    //Over screen
+    this.createGameOver();
+    //handle
+    this.handleScore();
+    this.handleColliders();
+    //event input
     this.createEventKeyboard();
     this.createEventMouse();
-    this.handleScore();
-    this.obstacles = this.physics.add.group();
-    this.handleColliders();
-    this.createSound();
-    this.add.image(400, 150, "textGameOver").setScale(0.7);
-    this.add.image(400, 230, "btnRestart");
+  }
+  init() {
+    this.isGamePlay = true;
+    this.anims.resumeAll();
+    this.physics.resume();
+  }
+  createGameOver() {
+    this.textGameOver = this.add
+      .image(400, 150, "textGameOver")
+      .setScale(0.7)
+      .setAlpha(0);
+    this.btnRestart = this.add.image(400, 230, "btnRestart").setAlpha(0);
   }
   //create Sound
   createSound() {
@@ -75,20 +68,19 @@ export default class ScenesPlay extends Phaser.Scene {
   handleColliders() {
     if (this.player && this.obstacles) {
       this.physics.add.collider(this.player, this.obstacles, () => {
-        const highScore = this.hightScoreText?.text.substring(
-          this.hightScoreText.text.length - 5
-        );
-        const newScore =
-          Number(this.scoreText?.text) > Number(highScore)
-            ? this.scoreText?.text
-            : highScore;
-        this.hightScoreText?.setText(`HI ${newScore}`);
+        if (Number(this.scoreText?.text) > this.hightScore) {
+          this.hightScoreText?.setText(`HI ${this.scoreText?.text}`);
+          this.hightScore = Math.max(this.hightScore, this.score);
+        }
+        this.textGameOver?.setAlpha(1);
+        this.btnRestart?.setAlpha(1);
+
         this.hitSound?.play();
         this.physics.pause();
         this.anims.pauseAll();
         this.player?.setTexture("playerRun", 0);
         this.gameSpeed = 5;
-        // this.score = 0;
+        this.score = 0;
         this.isGamePlay = false;
       });
     }
@@ -105,14 +97,18 @@ export default class ScenesPlay extends Phaser.Scene {
   }
   //create HeightScoreText
   createHightScoreText() {
-    if (!this.hightScoreText)
-      this.hightScoreText = this.add
-        .text(640, 10, "HI 00000", {
-          font: "900 30px Courier",
-          resolution: 5,
-          color: "#535353",
-        })
-        .setOrigin(1, 0);
+    let text;
+    this.hightScoreText
+      ? (text = this.hightScoreText.text)
+      : (text = "HI 00000");
+
+    this.hightScoreText = this.add
+      .text(640, 10, text, {
+        font: "900 30px Courier",
+        resolution: 5,
+        color: "#535353",
+      })
+      .setOrigin(1, 0);
   }
   //create Cloud
   createCloud() {
@@ -145,6 +141,7 @@ export default class ScenesPlay extends Phaser.Scene {
             if (this.player) {
               if (!(this.player.body as Phaser.Physics.Arcade.Body).onFloor())
                 return;
+
               this.player.play("duck", true);
               this.player.setBodySize(115, 58);
               this.player.setOffset(3, 32);
@@ -152,8 +149,6 @@ export default class ScenesPlay extends Phaser.Scene {
             }
             break;
         }
-      } else {
-        this.isGamePlay = true;
       }
     });
     this.input.keyboard.on("keyup", (e: KeyboardEvent) => {
@@ -175,10 +170,10 @@ export default class ScenesPlay extends Phaser.Scene {
   }
   createEventMouse() {
     this.input.on("pointerdown", (e: Phaser.Input.Pointer) => {
-      if (e.downX > 300 && e.downX < 500 && e.downY > 150 && e.downY < 250) {
-        console.log("abc");
-        this.scene.start("start");
-      }
+      if (!this.isGamePlay)
+        if (e.downX > 300 && e.downX < 500 && e.downY > 150 && e.downY < 250) {
+          this.scene.start("start");
+        }
     });
   }
 
@@ -318,14 +313,12 @@ export default class ScenesPlay extends Phaser.Scene {
   }
   //player
   updatePlayer() {
-    if (this.player) {
+    if (this.player && this.isGamePlay) {
       if (this.player.body.deltaAbsY() > 0) {
         this.player.anims.stop();
         this.player.setTexture("playerRun", 0);
       } else {
-        if (this.isGameRunning) {
-          this.player.play("run", true);
-        }
+        if (this.isGameRunning) this.player.play("run", true);
       }
     }
   }
