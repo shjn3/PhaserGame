@@ -2,6 +2,7 @@ import { Game } from "phaser";
 import ScenesStart from "./scenes/ScenesStart";
 import ScenesPlay from "./scenes/ScenesPlay";
 import PreloadPlay from "./scenes/PreloadPlay";
+import PreloadStart from "./scenes/PreloadStart";
 
 let config = {
   type: Phaser.AUTO,
@@ -15,7 +16,7 @@ let config = {
       debug: false,
     },
   },
-  scene: [ScenesStart, PreloadPlay, ScenesPlay],
+  scene: [PreloadStart, ScenesStart, PreloadPlay, ScenesPlay],
 };
 
 export default config;

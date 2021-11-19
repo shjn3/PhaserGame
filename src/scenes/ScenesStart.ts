@@ -1,14 +1,11 @@
 import Phaser from "phaser";
 
 export default class ScenesStart extends Phaser.Scene {
+  menuSound?: Phaser.Sound.BaseSound;
   constructor() {
     super("start");
   }
-  preload() {
-    this.load.image("player_start", "assets/player/Player_1.png");
-    this.load.image("ground", "assets/start/ground.png");
-    this.load.image("btnStart", "assets/start/PlayButton.png");
-  }
+  preload() {}
   create() {
     this.add.image(50, 310, "player_start").setScale(0.35);
     this.add.image(0, 330, "ground");
@@ -20,9 +17,14 @@ export default class ScenesStart extends Phaser.Scene {
         this.onChangeScenes();
       }
     });
+    this.menuSound = this.sound.add("music", {
+      loop: true,
+    });
+    this.menuSound.play();
   }
   update(time: number, delta: number): void {}
   onChangeScenes() {
+    this.menuSound?.destroy();
     this.scene.start("preloadPlay");
   }
 }

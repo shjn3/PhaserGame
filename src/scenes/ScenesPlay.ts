@@ -172,7 +172,7 @@ export default class ScenesPlay extends Phaser.Scene {
     this.input.on("pointerdown", (e: Phaser.Input.Pointer) => {
       if (!this.isGamePlay)
         if (e.downX > 300 && e.downX < 500 && e.downY > 150 && e.downY < 250) {
-          this.scene.start("start");
+          this.scene.start("preloadStart");
         }
     });
   }
@@ -261,14 +261,22 @@ export default class ScenesPlay extends Phaser.Scene {
       this.updatePlayer();
       this.updateGround();
       this.updateCloud();
-      if (this.obstacles) {
-        Phaser.Actions.IncX(this.obstacles.getChildren(), -this.gameSpeed);
-      }
       this.updateEnemey(time, delta);
     }
   }
   //Update Enemy
   updateEnemey(time: number, delta: number) {
+    if (this.obstacles) {
+      this.obstacles.getChildren().forEach((_e) => {
+        let child: Phaser.Physics.Arcade.Sprite =
+          _e as Phaser.Physics.Arcade.Sprite;
+        if (child.texture.key === "bird") {
+          child.x -= this.gameSpeed + 2;
+        } else {
+          child.x -= this.gameSpeed;
+        }
+      });
+    }
     this.respawnTime += delta * this.gameSpeed * 0.08;
     if (this.respawnTime >= 1000) {
       this.createEnemy();
