@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-export default class PreLoadPlay extends Phaser.Scene {
+export default class GamePlayLoadScene extends Phaser.Scene {
   constructor() {
     super("preloadPlay");
   }
@@ -32,13 +32,13 @@ export default class PreLoadPlay extends Phaser.Scene {
         175,
         this.game.renderer.height / 2 - 25,
         this.game.renderer.width / 2 + 50,
-        100
+        100,
       );
       loadingBar.fillRect(
         200,
         this.game.renderer.height / 2,
         (this.game.renderer.width * percent) / 2,
-        50
+        50,
       );
     });
     this.load.on("complete", () => {

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-export default class ScenesStart extends Phaser.Scene {
+export default class GameStartScene extends Phaser.Scene {
   menuSound?: Phaser.Sound.BaseSound;
   constructor() {
     super("start");

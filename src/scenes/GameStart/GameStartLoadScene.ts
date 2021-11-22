@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-export default class PreLoadStart extends Phaser.Scene {
+export default class GameStartLoadScene extends Phaser.Scene {
   constructor() {
     super("preloadStart");
   }
@@ -32,13 +32,13 @@ export default class PreLoadStart extends Phaser.Scene {
         175,
         this.game.renderer.height / 2 - 25,
         this.game.renderer.width / 2 + 50,
-        100
+        100,
       );
       loadingBar.fillRect(
         200,
         this.game.renderer.height / 2,
         (this.game.renderer.width * percent) / 2,
-        50
+        50,
       );
     });
     this.load.on("complete", () => {
@@ -55,7 +55,7 @@ export default class PreLoadStart extends Phaser.Scene {
   preloadAudio() {
     this.load.audio(
       "music",
-      "assets/music/238069__shuinvy__childhoodmusicboxhalf.mp3"
+      "assets/music/238069__shuinvy__childhoodmusicboxhalf.mp3",
     );
   }
   //=========================create

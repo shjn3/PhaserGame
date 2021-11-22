@@ -1,8 +1,10 @@
 import { Game } from "phaser";
-import ScenesStart from "./scenes/ScenesStart";
-import ScenesPlay from "./scenes/ScenesPlay";
-import PreloadPlay from "./scenes/PreloadPlay";
-import PreloadStart from "./scenes/PreloadStart";
+
+import GameStartScene from "./scenes/GameStart/GameStartScene";
+import GameStartLoadScene from "./scenes/GameStart/GameStartLoadScene";
+
+import GamePlayScene from "./scenes/GamePlay/GamePlayScene";
+import GamePlayLoadScene from "./scenes/GamePlay/GamePlayLoadScene";
 
 let config = {
   type: Phaser.AUTO,
@@ -21,7 +23,7 @@ let config = {
       forceSetTimeOut: true,
     },
   },
-  scene: [PreloadStart, ScenesStart, PreloadPlay, ScenesPlay],
+  scene: [GameStartLoadScene, GameStartScene, GamePlayLoadScene, GamePlayScene],
 };
 
 export default config;
