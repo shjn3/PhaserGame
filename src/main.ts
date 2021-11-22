@@ -10,10 +10,15 @@ let config = {
   width: 800,
   height: 400,
   backgroundColor: "#fff",
+
   physics: {
     default: "arcade",
     arcade: {
       debug: false,
+    },
+    fps: {
+      target: 30,
+      forceSetTimeOut: true,
     },
   },
   scene: [PreloadStart, ScenesStart, PreloadPlay, ScenesPlay],

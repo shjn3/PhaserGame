@@ -1,11 +1,10 @@
 import Phaser from "phaser";
-
 export default class ScenesPlay extends Phaser.Scene {
   player?: Phaser.Physics.Arcade.Sprite;
   ground?: Phaser.GameObjects.TileSprite;
   clouds?: Phaser.GameObjects.Group;
   test: boolean = false;
-  gameSpeed: number = 4;
+  gameSpeed: number = 2;
   isGameRunning: boolean = true;
   gapCloud: number = 0;
   score: number = 0;
@@ -79,7 +78,7 @@ export default class ScenesPlay extends Phaser.Scene {
         this.physics.pause();
         this.anims.pauseAll();
         this.player?.setTexture("playerRun", 0);
-        this.gameSpeed = 5;
+        this.gameSpeed = 2;
         this.score = 0;
         this.isGamePlay = false;
       });
@@ -131,7 +130,7 @@ export default class ScenesPlay extends Phaser.Scene {
             if (this.player) {
               if (!(this.player.body as Phaser.Physics.Arcade.Body).onFloor())
                 return;
-              this.player.setVelocityY(-650);
+              this.player.setVelocityY(-1000);
               this.player.setBodySize(44, 90);
               this.player.setOffset(22, 0);
               this.jumpSound?.play();
@@ -142,10 +141,8 @@ export default class ScenesPlay extends Phaser.Scene {
               if (!(this.player.body as Phaser.Physics.Arcade.Body).onFloor())
                 return;
 
-              this.player.play("duck", true);
               this.player.setBodySize(115, 58);
               this.player.setOffset(3, 32);
-              this.isGameRunning = false;
             }
             break;
         }
@@ -158,10 +155,8 @@ export default class ScenesPlay extends Phaser.Scene {
             if (this.player) {
               if (!(this.player.body as Phaser.Physics.Arcade.Body).onFloor())
                 return;
-              this.player.play("run", true);
               this.player.setBodySize(44, 90);
               this.player.setOffset(22, 0);
-              this.isGameRunning = true;
             }
             break;
         }
@@ -213,7 +208,7 @@ export default class ScenesPlay extends Phaser.Scene {
       .setOrigin(0, 1)
       .setScale(0.7)
       .setCollideWorldBounds(true)
-      .setGravityY(1000);
+      .setGravityY(2000);
   }
   //ground
   createGround() {
@@ -234,7 +229,7 @@ export default class ScenesPlay extends Phaser.Scene {
         ?.create(
           (width as number) + distance,
           (height as number) - birdHeight[this.getRandom(0, 1)],
-          "enemy-bird"
+          "enemy-bird",
         )
         .setOrigin(0, 1)
         .setScale(0.7);
@@ -246,7 +241,7 @@ export default class ScenesPlay extends Phaser.Scene {
         ?.create(
           (width as number) + distance,
           height as number,
-          `cactuses${enemyNumber}`
+          `cactuses${enemyNumber}`,
         )
         .setScale(0.7)
         .setOrigin(0, 1);
@@ -271,7 +266,7 @@ export default class ScenesPlay extends Phaser.Scene {
         let child: Phaser.Physics.Arcade.Sprite =
           _e as Phaser.Physics.Arcade.Sprite;
         if (child.texture.key === "bird") {
-          child.x -= this.gameSpeed + 2;
+          child.x -= this.gameSpeed + 1;
         } else {
           child.x -= this.gameSpeed;
         }
@@ -299,7 +294,7 @@ export default class ScenesPlay extends Phaser.Scene {
   //cloud
   updateCloud() {
     if (this.clouds) {
-      Phaser.Actions.IncX(this.clouds?.getChildren(), -3);
+      Phaser.Actions.IncX(this.clouds?.getChildren(), -this.gameSpeed - 1);
       this.clouds
         .getChildren()
         .forEach((env: Phaser.GameObjects.GameObject, index: number) => {
@@ -321,12 +316,14 @@ export default class ScenesPlay extends Phaser.Scene {
   }
   //player
   updatePlayer() {
-    if (this.player && this.isGamePlay) {
+    if (!this.isGamePlay) return;
+    if (this.player) {
       if (this.player.body.deltaAbsY() > 0) {
         this.player.anims.stop();
         this.player.setTexture("playerRun", 0);
       } else {
-        if (this.isGameRunning) this.player.play("run", true);
+        if (this.player.body.height <= 58) this.player.play("duck", true);
+        else this.player.play("run", true);
       }
     }
   }
