@@ -22,6 +22,7 @@ export default class GamePlayScene extends Phaser.Scene {
   textGameOver?: Phaser.GameObjects.Image;
   btnRestart?: Phaser.GameObjects.Image;
 
+  gameOverScreen?: Phaser.GameObjects.Container;
   constructor() {
     super("play");
   }
@@ -49,8 +50,6 @@ export default class GamePlayScene extends Phaser.Scene {
     //handle event
     this.handleScore();
     this.handleColliders();
-    //event input
-    this.createEventMouse();
   }
   init() {
     this.isGamePlay = true;
@@ -59,20 +58,15 @@ export default class GamePlayScene extends Phaser.Scene {
   }
   /*=============create============ */
   createGameOver() {
-    this.textGameOver = this.add
-      .image(400, 150, "textGameOver")
-      .setScale(0.7)
-      .setAlpha(0);
-    this.btnRestart = this.add.image(400, 230, "btnRestart").setAlpha(0);
-  }
-  createEventMouse() {
-    this.input.on("pointerdown", (e: Phaser.Input.Pointer) => {
-      if (!this.isGamePlay)
-        if (e.downX > 300 && e.downX < 500 && e.downY > 150 && e.downY < 250) {
-          this.scene.start("preloadStart");
-        }
+    this.textGameOver = this.add.image(400, 150, "textGameOver").setScale(0.7);
+    this.btnRestart = this.add.image(400, 230, "btnRestart").setInteractive();
+    this.btnRestart.on("pointerdown", () => {
+      if (!this.isGamePlay) this.scene.start("preloadStart");
     });
+    this.gameOverScreen = this.add.container(0, 0).setAlpha(0);
+    this.gameOverScreen.add([this.textGameOver, this.btnRestart]);
   }
+
   //create Sound
   createSound() {
     this.hitSound = this.sound.add("hit");
@@ -93,8 +87,7 @@ export default class GamePlayScene extends Phaser.Scene {
             );
           }
         this.player?.setTexture("playerRun");
-        this.textGameOver?.setAlpha(1);
-        this.btnRestart?.setAlpha(1);
+        this.gameOverScreen?.setAlpha(1);
         this.hitSound?.play();
         this.physics.pause();
         this.anims.pauseAll();
@@ -160,7 +153,6 @@ export default class GamePlayScene extends Phaser.Scene {
         .setVelocityCloud(randomVelocity),
     );
   }
-
   //Animation
   createAnis() {
     //animation enemy bird
@@ -198,8 +190,6 @@ export default class GamePlayScene extends Phaser.Scene {
         y: (height as number) - birdHeight[Phaser.Math.Between(0, 1)],
         texture: "enemy-bird",
       });
-      obstacles.play("fly");
-      obstacles.body.setSize(50, 60);
       this.obstacles?.add(obstacles);
     } else {
       //create cactus
@@ -209,12 +199,10 @@ export default class GamePlayScene extends Phaser.Scene {
         y: height as number,
         texture: `cactuses${enemyNumber}`,
       });
-      obstacles.body.offset.y = +10;
       this.obstacles?.add(obstacles);
     }
     obstacles.setImmovable();
   }
-
   /*==================update================= */
   update(time: number, delta: number): void {
     if (!this.isGamePlay) return;
@@ -239,17 +227,20 @@ export default class GamePlayScene extends Phaser.Scene {
   }
   //Update Enemy
   updateEnemey(time: number, delta: number) {
+    // update enemys
     if (this.obstacles) {
       this.obstacles.getChildren().forEach((_e) => {
         let child = _e as Phaser.Physics.Arcade.Sprite;
         child.update(this.gameSpeed);
       });
     }
+    //create new enemy
     this.respawnTime += delta * this.gameSpeed * 0.08;
     if (this.respawnTime >= 1000) {
       this.createEnemy();
       this.respawnTime = 0;
     }
+    //delete enemy
     if (this.obstacles) {
       this.obstacles
         .getChildren()
@@ -257,8 +248,7 @@ export default class GamePlayScene extends Phaser.Scene {
           let child = obstacle as
             | Phaser.Physics.Arcade.Sprite
             | Phaser.Physics.Arcade.Image;
-          if (child.getBounds().right < 0)
-            this.obstacles?.killAndHide(obstacle);
+          if (child.getBounds().right < 0) child.destroy();
         });
     }
   }
@@ -269,7 +259,6 @@ export default class GamePlayScene extends Phaser.Scene {
       loop: true,
       callback: () => {
         if (!this.isGamePlay) return;
-
         this.gameSpeed += 0.01;
         this.scoreText?.updateScore();
       },
