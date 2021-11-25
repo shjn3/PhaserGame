@@ -188,7 +188,7 @@ export default class GamePlayScene extends Phaser.Scene {
         scene: this,
         x: (width as number) + distance,
         y: (height as number) - birdHeight[Phaser.Math.Between(0, 1)],
-        texture: "enemy-bird",
+        texture: "bird",
       });
       this.obstacles?.add(obstacles);
     } else {

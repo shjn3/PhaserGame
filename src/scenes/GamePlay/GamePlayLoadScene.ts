@@ -27,7 +27,6 @@ export default class GamePlayLoadScene extends Phaser.Scene {
     this.load.on("progress", (percent: number) => {
       textLoading.setText(`Loading...${Math.floor(percent * 100)}%`);
       loadingBar.clear();
-
       loadingBar.strokeRect(
         175,
         this.game.renderer.height / 2 - 25,
